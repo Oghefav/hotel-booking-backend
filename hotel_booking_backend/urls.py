@@ -24,5 +24,7 @@ urlpatterns = [
     path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('user/', include('custom_user.api.routers')),
     path('auth/', include('authentication.api.routers')),
-    path('api/token/refresh', TokenRefreshView.as_view(), name='token_refresh_view'),
+    path('refresh_token/', TokenRefreshView.as_view(), name='token_refresh_view'),
+    path('hotel/', include('hotel.api.routers')),
+    path('booking/', include('booking.api.routers')),
 ]

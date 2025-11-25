@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'hotel',
+    'booking',
 ]
 
 MIDDLEWARE = [
@@ -128,7 +129,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "USER_ID_FIELD": "public_id",
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),   # change duration here
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),   # change duration here
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
