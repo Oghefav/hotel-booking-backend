@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'hotel',
     'booking',
+    'review'
 ]
 
 MIDDLEWARE = [
@@ -129,7 +130,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "USER_ID_FIELD": "public_id",
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),   # change duration here
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),   # change duration here
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -177,3 +178,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+FLW_PUBLIC_KEY = os.getenv('PUBLIC_KEY')
+FLW_SECRET_KEY = os.getenv('SECRET_KEY')
+FLW_BASE_URL = "https://api.flutterwave.com/v3"
+FLW_ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')

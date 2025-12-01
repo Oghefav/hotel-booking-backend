@@ -10,6 +10,11 @@ class HotelSerializer(serializers.ModelSerializer):
         model = Hotel
         fields = ['public_id', 'name', 'city', 'country', 'amenities', 'description', 'created_at', 'updated_at']
 
+    def create(self, validated_data):
+        validated_data['name'] = validated_data['name'].lower()
+        validated_data['country'] = validated_data['country'].lower()
+        return Hotel.objects.create(**validated_data)
+
 
     
 
@@ -26,5 +31,7 @@ class RoomSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         hotel = validated_data['hotel']
         code = random.randint(100000, 300000)
-        validated_data['room_id'] = hotel.name[:5].upper() + str(code)
-        return Room.objects.create(**validated_data)
+        room=Room(**validated_data)
+        room.room_id = hotel.name[:5].upper() + str(code)
+        room.save()
+        return room

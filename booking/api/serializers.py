@@ -10,7 +10,7 @@ def get_next_available_date(room,):
     lastest_available_date = Booking.objects.filter(room=room).aggregate(last_check_out=Max('check_out'))['last_check_out']
 
     if not lastest_available_date:
-        return None
+        return None, 'No booking has been made'
     return lastest_available_date + timedelta(days=1), 'it will be avaliable from'
 
 class BookingSerializer(serializers.ModelSerializer, AbstractModelSerializer):
@@ -21,25 +21,34 @@ class BookingSerializer(serializers.ModelSerializer, AbstractModelSerializer):
     check_in = serializers.DateField()
     check_out = serializers.DateField()
     total_price = serializers.DecimalField(max_digits=10, decimal_places=2,read_only=True)
-    room_id = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all(), source='room', write_only=True)
+    room_id = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all(), write_only=True)
     room = serializers.StringRelatedField(read_only=True)
+    room_type = serializers.CharField(write_only=True)
+    status = serializers.CharField(read_only=True)
 
     class Meta:
         model = Booking
-        fields = ['public_id', 'created_at', 'updated_at' ,'customer', 'hotel','customer_id', 'hotel_id','room_id' ,'room', 'check_in', 'check_out', 'status', 'total_price',]
+        fields = ['public_id', 'created_at', 'updated_at' ,'customer', 'hotel','customer_id', 'hotel_id','room_id' ,'room', 'check_in', 'check_out', 'status', 'total_price','room_type']
 
     def create(self, validated_data):
-        room = validated_data['room']
+        room = validated_data['room_id']
+        print(f" validated data is {validated_data}")
         check_in = validated_data['check_in']
+        validated_data.pop('room_type')
         check_out = validated_data['check_out']
         days = (check_out - check_in).days
         if days == 0:
             days = 1
-        validated_data['total_price'] = room.price * days
-        return Booking.objects.create(**validated_data)
+        total_price = room.price * days
+        print(f"totela price is {total_price}")
+        return Booking.objects.create(
+            total_price = total_price,
+            **validated_data
+        )
     
     def validate(self, attrs):
-        room = attrs.get('room')
+        room = attrs.get('room_id')
+        print(type(room))
         new_check_in = attrs.get('check_in')
         new_check_out = attrs.get('check_out')
         overlapping_bookings = Booking.objects.filter(
