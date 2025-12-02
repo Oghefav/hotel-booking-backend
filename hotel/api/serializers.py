@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from abstract.models import AbstractModel
-from hotel.models import Hotel, Room
+from hotel.models import Hotel, Room, HotelImage, RoomImage
 import random
 class HotelSerializer(serializers.ModelSerializer):
     public_id = serializers.UUIDField(read_only=True)
@@ -35,3 +35,32 @@ class RoomSerializer(serializers.ModelSerializer):
         room.room_id = hotel.name[:5].upper() + str(code)
         room.save()
         return room
+    
+class UploadHotelImageSerializer(serializers.Serializer):
+    hotel_id = serializers.PrimaryKeyRelatedField(queryset=Hotel.objects.all())
+#     hotel_images = serializers.ListField(
+#     child=serializers.ImageField(),
+#     allow_empty=False,
+#     help_text="Select multiple images. For Swagger UI, only one can be selected. Use Postman or frontend to upload multiple files."
+# )
+    
+
+class UploadRoomImageSerializer(serializers.Serializer):
+    room_id = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    # room_images = serializers.ListField(child=serializers.ImageField(), allow_empty=False, help_text="Select multiple images. For Swagger UI, only one can be selected. Use Postman or frontend to upload multiple files.")
+
+    
+
+class RoomImageSerializer(serializers.ModelSerializer):
+    room = serializers.StringRelatedField(read_only=True)
+    
+    class  Meta:
+        model = RoomImage
+        fields = ['id', 'room', 'room_image']
+
+class HotelImageSerializer(serializers.ModelSerializer):
+    hotel = serializers.StringRelatedField(read_only=True)
+    
+    class  Meta:
+        model = HotelImage
+        fields = ['id', 'hotel', 'hotel_image']

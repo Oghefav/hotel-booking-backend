@@ -1,5 +1,6 @@
 from django.db import models
 from abstract.models import AbstractModel
+import hashlib
 
 # Create your models here.
 
@@ -29,3 +30,35 @@ class Room(models.Model):
 
     def __str__(self):
         return self.room_id
+    
+class HotelImage(models.Model):
+    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='images')
+    hotel_image = models.ImageField(upload_to='hotel_images', )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file_hash = models.CharField(max_length=100, blank=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if self.hotel_image and not self.file_hash:
+            self.hotel_image.seek(0)
+            hasher = hashlib.md5()
+            for chunk in self.hotel_image.chunks():
+                hasher.update(chunk)
+            self.file_hash = hasher.hexdigest()
+            self.hotel_image.seek(0)
+        super().save(*args, **kwargs)
+
+class RoomImage(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='images')
+    room_image = models.ImageField(upload_to='room_images')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file_hash = models.CharField(max_length=100, blank=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if self.room_image and not self.file_hash:
+            self.room_image.seek(0)
+            hasher = hashlib.md5()
+            for chunk in self.room_image.chunks():
+                hasher.update(chunk)
+            self.file_hash = hasher.hexdigest()
+            self.room_image.seek(0)
+        super().save(*args, **kwargs)

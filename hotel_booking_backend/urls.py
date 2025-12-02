@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.conf import settings
+from django.conf.urls.static import static
 from hotel_booking_backend.schema import schema_view
 from rest_framework_simplejwt.views import TokenRefreshView
 urlpatterns = [
@@ -29,3 +31,5 @@ urlpatterns = [
     path('booking/', include('booking.api.routers')),
     path('review/', include('review.api.routers'))
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
