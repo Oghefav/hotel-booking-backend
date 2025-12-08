@@ -12,7 +12,7 @@ class Booking(AbstractModel):
 
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings')
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='bookings')
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='bookings')
+    room = models.ForeignKey(Room, on_delete=models.SET_NULL, related_name='bookings', null=True)
     check_in = models.DateField()
     check_out = models.DateField()
     status = models.CharField(max_length=10, choices=BookingStatus.choices, default=BookingStatus.PENDING)

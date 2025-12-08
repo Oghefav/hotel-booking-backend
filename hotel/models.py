@@ -22,7 +22,7 @@ class Room(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='rooms')
-    room_id = models.CharField(max_length=10, unique=True, primary_key=True, editable=False)
+    room_id = models.CharField(max_length=15, unique=True, primary_key=True, editable=False)
     room_type = models.CharField(max_length=10, choices=RoomType.choices)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     is_available = models.BooleanField(default=True)

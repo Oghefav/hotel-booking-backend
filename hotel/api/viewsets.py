@@ -38,9 +38,8 @@ class HotelViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['get'])
     def search_by_location(self, request):
-        city = str(request.query_params.get('city')).lower()
-        country = str(request.query_params.get('country')).lower()
-        print(city)
+        city = request.query_params.get('city')
+        country = request.query_params.get('country')
         hotels = None
         if city:
             hotels = Hotel.objects.filter(city=city)

@@ -23,18 +23,18 @@ class BookingSerializer(serializers.ModelSerializer, AbstractModelSerializer):
     total_price = serializers.DecimalField(max_digits=10, decimal_places=2,read_only=True)
     room_id = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all(), write_only=True)
     room = serializers.StringRelatedField(read_only=True)
-    room_type = serializers.CharField(write_only=True)
+    # room_type = serializers.CharField(write_only=True)
     status = serializers.CharField(read_only=True)
 
     class Meta:
         model = Booking
-        fields = ['public_id', 'created_at', 'updated_at' ,'customer', 'hotel','customer_id', 'hotel_id','room_id' ,'room', 'check_in', 'check_out', 'status', 'total_price','room_type']
+        fields = ['public_id', 'created_at', 'updated_at' ,'customer', 'hotel','customer_id', 'hotel_id','room_id' ,'room', 'check_in', 'check_out', 'status', 'total_price','payment_reference']
 
     def create(self, validated_data):
         room = validated_data['room_id']
+        print
         print(f" validated data is {validated_data}")
         check_in = validated_data['check_in']
-        validated_data.pop('room_type')
         check_out = validated_data['check_out']
         days = (check_out - check_in).days
         if days == 0:
@@ -49,6 +49,8 @@ class BookingSerializer(serializers.ModelSerializer, AbstractModelSerializer):
     def validate(self, attrs):
         room = attrs.get('room_id')
         print(type(room))
+        hotel = attrs.get('hotel')
+        print(f"hotel is {hotel}")
         new_check_in = attrs.get('check_in')
         new_check_out = attrs.get('check_out')
         overlapping_bookings = Booking.objects.filter(
@@ -60,4 +62,6 @@ class BookingSerializer(serializers.ModelSerializer, AbstractModelSerializer):
         last_available_date, msg = get_next_available_date(room)
         if overlapping_bookings:
             raise serializers.ValidationError(f"The room is already booked for the selected dates. {msg} {last_available_date}")
+        if not Room.objects.filter(room_id=room.room_id, hotel=hotel).exists():
+            raise serializers.ValidationError(f"{room.room_id} does not exist in {hotel.name}")
         return attrs

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from custom_user.models import User
 from authentication.api.serializers import CustomerRegistrationSerializer, LoginSerializer, PasswordChangeSerializer, PasswordResetCodeSerializer, PasswordResetSerializer
+from rest_framework.parsers import MultiPartParser,FormParser
 from rest_framework.decorators import action
 import threading
 from django.core.mail import send_mail
@@ -96,12 +97,11 @@ class PasswordChangeViewSet(viewsets.ViewSet):
                 ),
             }
         ),)
-    @action(detail=False, methods=['post'], url_path='change-password')
+    @action(detail=False, methods=['post'],)
     def change_password(self, request):
         serializer = PasswordChangeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = request.user
-        print(user.public_id)
         old_password = serializer.validated_data.get('old_password')
         new_password = serializer.validated_data.get('new_password')
 
@@ -116,8 +116,6 @@ class PasswordResetCodeViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     serailizer_class = PasswordResetCodeSerializer
 
-    # def verify_code(user, code):
-    #     verification_code = Ve
     @swagger_auto_schema(
         operation_description="Request code for password reset",
         request_body=openapi.Schema(
@@ -131,14 +129,13 @@ class PasswordResetCodeViewSet(viewsets.ViewSet):
                 ),
             }
         ),)
-    @action(detail=False, methods=['post'], url_path='password-reset-code')
+    @action(detail=False, methods=['post'],)
     def send_password_reset_code(self, request):
         serializer = self.serailizer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
-        print(f"{email}, is tehelkj;kalj")
         
-        if User.objects.filter(email=email).exists:
+        if User.objects.filter(email=email).exists():
             user = User.objects.get(email=email)
             verification_code = VerificationCode.create_code(user=user)
             message = f"Dear {user.first_name},\n\n The code for resetting your password is {verification_code.code}.\n\n Ignore this message if you did not request for this code"
@@ -197,11 +194,14 @@ class PasswordResetViewSet(viewsets.ViewSet):
                 ),
             }
         ),)
-    @action(detail=False, methods=['post'], url_path='reset-password')
+    @action(detail=False, methods=['post'],)
     def reset_password(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid()
         email = serializer.validated_data.get('email')
+        if not email:
+            return Response({'message':'email field is required'}, status=status.HTTP_400_BAD_REQUEST)
+        print(f"email {email}")
         code = serializer.validated_data.get('reset_code')
         new_password = serializer.validated_data.get('new_password')
 
@@ -238,7 +238,7 @@ class LogOutViewSet(viewsets.ViewSet):
                 ),
             }
         ))
-    @action(detail=False, methods=['post'], url_path='logout')
+    @action(detail=False, methods=['post'],)
     def logout(self, request):
         try:
             print(f" this is the {request.data['refresh']}")

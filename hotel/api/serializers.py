@@ -32,7 +32,7 @@ class RoomSerializer(serializers.ModelSerializer):
         hotel = validated_data['hotel']
         code = random.randint(100000, 300000)
         room=Room(**validated_data)
-        room.room_id = hotel.name[:5].upper() + str(code)
+        room.room_id = hotel.name[:3].upper() + str(code)
         room.save()
         return room
     
@@ -56,11 +56,11 @@ class RoomImageSerializer(serializers.ModelSerializer):
     
     class  Meta:
         model = RoomImage
-        fields = ['id', 'room', 'room_image']
+        fields = ['id', 'room', 'room_image', 'uploaded_at']
 
 class HotelImageSerializer(serializers.ModelSerializer):
     hotel = serializers.StringRelatedField(read_only=True)
     
     class  Meta:
         model = HotelImage
-        fields = ['id', 'hotel', 'hotel_image']
+        fields = ['id', 'hotel', 'hotel_image', 'uploaded_at']

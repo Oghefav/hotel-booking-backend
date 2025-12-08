@@ -93,16 +93,24 @@ class BookingViewSet(viewsets.ModelViewSet):
             400: openapi.Response(description="Payment not successful or error")
         }
     )
-    @action(detail=False, methods=['get'], url_path='verify-payment')
-    def verify_payment(request,):
+    @action(detail=False, methods=['get'],)
+    def verify_payment(self, request):
         tx_ref = request.query_params.get('tx_ref')
+            
         try:
             headers = {
                 "Authorization": f"Bearer {settings.FLW_SECRET_KEY}"
             }
-            res = requests.get(f"{settings.FLW_BASE_URL}/transactions/verify?tx_ref={tx_ref}", headers=headers).json()
-
-            if res.get("status") == "success" and res['data']['status'] == 'successful':
+            res = requests.get(f"{settings.FLW_BASE_URL}/transactions/{tx_ref}/verify",headers=headers)
+            try:
+                res_json = res.json()
+                print(f"this is res_json{res_json}")
+            except ValueError:
+                return Response(
+                    {"error": "Payment verification API returned invalid response", "details": res.text},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if res_json.get("status") == "success" and res_json['data']['status'] == 'successful':
                 booking_id = res['data']['meta']['booking_id']
                 booking = Booking.objects.get(booking_id=booking_id)
                 booking.status = "paid"
