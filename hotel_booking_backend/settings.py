@@ -27,6 +27,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
+if SECRET_KEY:
+       SECRET_KEY = SECRET_KEY.strip()
+   
+print(f"DEBUG: SECRET_KEY is {'SET' if SECRET_KEY else 'EMPTY'}")
+print(f"DEBUG: All env vars: {list(os.environ.keys())}")
+   
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY not found in environment!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', "FALSE").lower() == "true"
