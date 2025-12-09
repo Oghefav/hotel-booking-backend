@@ -30,9 +30,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 if SECRET_KEY:
        SECRET_KEY = SECRET_KEY.strip()
    
-print(f"DEBUG: SECRET_KEY is {'SET' if SECRET_KEY else 'EMPTY'}")
-print(f"DEBUG: All env vars: {list(os.environ.keys())}")
-   
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY not found in environment!")
 
@@ -133,13 +130,7 @@ if database_url:
     
     DATABASES['default'] = dj_database_url.parse(database_url)
 else:
-    # Fallback to default database config if DATABASE_URL is not set
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+    raise ValueError("database url not set properly")
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
