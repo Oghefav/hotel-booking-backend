@@ -36,10 +36,18 @@ print(f"DEBUG: All env vars: {list(os.environ.keys())}")
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY not found in environment!")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', "FALSE").lower() == "true"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(" ")
 
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split()
+
+# If empty or not set, use sensible defaults for production
+if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
+    ALLOWED_HOSTS = [
+        'hotel-booking-api-15ne.onrender.com',
+        '.onrender.com',
+        'localhost',
+        '127.0.0.1'
+    ]
 
 # Application definition
 
