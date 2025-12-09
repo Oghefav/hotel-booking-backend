@@ -108,8 +108,22 @@ DATABASES = {
 }
 
 database_url = os.getenv('DATABASE_URL')
-print(database_url)
-DATABASES['default'] = dj_database_url.parse(database_url)
+
+# Check if database_url exists and convert bytes to string if needed
+if database_url:
+    # If it's bytes, decode it to string
+    if isinstance(database_url, bytes):
+        database_url = database_url.decode('utf-8')
+    
+    DATABASES['default'] = dj_database_url.parse(database_url)
+else:
+    # Fallback to default database config if DATABASE_URL is not set
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
