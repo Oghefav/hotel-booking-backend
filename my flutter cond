@@ -1,0 +1,30 @@
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  // Use the WEB CLIENT ID from Google Console here
+  serverClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+);
+
+Future<void> handleSignIn() async {
+  try {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+
+    // Send the access token to Django
+    final response = await http.post(
+      Uri.parse('https://your-api.com/api/auth/google/'),
+      body: {
+        'access_token': googleAuth.accessToken, // This is the key!
+      },
+    );
+
+    final data = json.decode(response.body);
+    String jwtToken = data['access']; // This is your Django JWT
+    
+    // Save jwtToken to secure storage (flutter_secure_storage)
+  } catch (error) {
+    print(error);
+  }
+}

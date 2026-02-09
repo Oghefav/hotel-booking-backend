@@ -23,15 +23,14 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractModel):
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     phone = models.CharField(max_length=15, blank=True)
-    username = models.CharField(max_length=30, unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-
+    username = None
     objects = UserManager()
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.username
+        return self.email

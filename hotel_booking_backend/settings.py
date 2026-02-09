@@ -8,6 +8,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
+
 """
 
 from pathlib import Path
@@ -17,7 +18,7 @@ import os
 from dotenv import load_dotenv
 import dj_database_url
 load_dotenv()
-
+from django.contrib.auth import get_user_model
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,25 +28,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
-if SECRET_KEY:
-       SECRET_KEY = SECRET_KEY.strip()
-   
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY not found in environment!")
 
-DEBUG = os.getenv('DEBUG', "FALSE").lower() == "true"
-
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split()
-
-# If empty or not set, use sensible defaults for production
-if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
-    ALLOWED_HOSTS = [
-        'hotel-booking-api-15ne.onrender.com',
-        '.onrender.com',
-        'localhost',
-        '127.0.0.1'
-    ]
-
+DEBUG = True
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "10.0.2.2",     # Android emulator
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -62,6 +51,8 @@ INSTALLED_APPS = [
     'authentication',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'allauth',
+    'rest_framework.authtoken',
     'hotel',
     'booking',
     'review'
@@ -98,6 +89,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'hotel_booking_backend.wsgi.application'
 
+# Tell Django & allauth we don't use usernames
+AUTH_USER_MODEL = "custom_user.User"  # adjust app name
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "optional"  # or "mandatory" if you want
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -120,17 +119,8 @@ DATABASES = {
     }
 }
 
-database_url = os.getenv('DATABASE_URL')
+# database_url = os.getenv('DATABASE_URL')
 
-# Check if database_url exists and convert bytes to string if needed
-if database_url:
-    # If it's bytes, decode it to string
-    if isinstance(database_url, bytes):
-        database_url = database_url.decode('utf-8')
-    
-    DATABASES['default'] = dj_database_url.parse(database_url)
-else:
-    raise ValueError("database url not set properly")
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -171,6 +161,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
 }
+
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -220,3 +211,5 @@ FLW_PUBLIC_KEY = os.getenv('PUBLIC_KEY')
 FLW_SECRET_KEY = os.getenv('FLW_SECRET_KEY')
 FLW_BASE_URL = "https://api.flutterwave.com/v3"
 FLW_ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
+
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')

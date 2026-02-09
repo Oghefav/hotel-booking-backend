@@ -22,14 +22,19 @@ from hotel_booking_backend.schema import schema_view
 from rest_framework_simplejwt.views import TokenRefreshView
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('user/', include('custom_user.api.routers')),
-    path('auth/', include('authentication.api.routers')),
-    path('refresh_token/', TokenRefreshView.as_view(), name='token_refresh_view'),
-    path('hotel/', include('hotel.api.routers')),
-    path('booking/', include('booking.api.routers')),
-    path('review/', include('review.api.routers'))
+    path('api/v1/',include([
+        path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+        path('user/', include('custom_user.api.routers')),
+        path('auth/', include('authentication.api.routers')),
+        path('refresh_token/', TokenRefreshView.as_view(), name='token_refresh_view'),
+        path('hotel/', include('hotel.api.routers')),
+        path('booking/', include('booking.api.routers')),
+        path('review/', include('review.api.routers')),
+        ])),
+
+    path('accounts/', include('allauth.urls'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -15,7 +15,7 @@ class CustomerRegistrationSerializer(serializers.ModelSerializer, AbstractModelS
 
     class Meta:
         model = User
-        fields = ['public_id','email', 'first_name', 'last_name', 'phone', 'username', 'password', 'confirm_password', 'public_id', 'created_at', 'updated_at', 'is_active',] 
+        fields = ['public_id','email', 'first_name', 'last_name', 'phone',  'password', 'confirm_password', 'public_id', 'created_at', 'updated_at', 'is_active',] 
 
     def create(self, validated_data):
         password = validated_data.pop('password')

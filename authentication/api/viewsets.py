@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
@@ -9,12 +10,18 @@ from authentication.api.serializers import CustomerRegistrationSerializer, Login
 from rest_framework.parsers import MultiPartParser,FormParser
 from rest_framework.decorators import action
 import threading
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from rest_framework.views import APIView
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from authentication.models import VerificationCode
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password as django_validate_password
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class HandleThreading(threading.Thread):
     def __init__(self, subject, message, recipient_list):
@@ -56,11 +63,11 @@ class LoginViewSet(viewsets.ViewSet):
         operation_description="User login endpoint",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['username', 'password'],
+            required=['email', 'password'],
             properties={
-                'username': openapi.Schema(
+                'email': openapi.Schema(
                     type=openapi.TYPE_STRING, 
-                    description='Username or email'
+                    description='Email'
                 ),
                 'password': openapi.Schema(
                     type=openapi.TYPE_STRING, 
@@ -251,3 +258,33 @@ class LogOutViewSet(viewsets.ViewSet):
             return Response({'message': request.data.get('refresh')}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({'message' : 'Logout is successful'})
     
+
+class GoogleAuthView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        token = request.data.get('id_token')
+        if not token:
+            return Response({'error': 'ID token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_CLIENT_ID)
+            email = idinfo.get('email')
+            name = idinfo.get('name')
+
+            if not email:
+                return Response({'error': 'Email not available in token.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user, created = User.objects.get_or_create(email=email, defaults={'first_name': name})
+            refresh_token = RefreshToken.for_user(user)
+
+            return Response({
+                'message': 'Authentication successful.',
+                'refresh': str(refresh_token),
+                'access': str(refresh_token.access_token),
+                'data': {
+                    'public_id': user.public_id,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                },}, status=status.HTTP_200_OK)
+        except ValueError:
+            return Response({'error': 'Invalid ID token.'}, status=status.HTTP_400_BAD_REQUEST)
